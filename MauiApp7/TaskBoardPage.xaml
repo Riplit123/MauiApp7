@@ -2,25 +2,49 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiApp7.TaskBoardPage"
-             Title="TaskBoardPage">
-    <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*">
-        <!-- Временная шкала слева -->
-        <StackLayout x:Name="TimeScale" Grid.Row="1" Grid.Column="0" Padding="10" Spacing="20">
-            <Label Text="Час"/>
-            <Label Text="День"/>
-            <Label Text="Неделя"/>
-            <Label Text="Месяц"/>
-        </StackLayout>
+             Title="Мои задачи" BackgroundColor="Black">
+    <ScrollView>
+        <Grid RowDefinitions="Auto,Auto,*" ColumnDefinitions="Auto,*">
+            <!-- Область временной шкалы (слева) -->
+            <StackLayout x:Name="TimelinePanel" Grid.Row="1" Grid.Column="0" 
+                 Padding="10" Spacing="5" BackgroundColor="LightYellow">
+                <!-- Здесь динамически будут добавлены метки -->
+            </StackLayout>
 
-        <!-- Поле для размещения фигур задач -->
-        <AbsoluteLayout x:Name="TaskField" Grid.Row="1" Grid.Column="1"
-                    BackgroundColor="LightGray" HeightRequest="500" />
+            <!-- Область для размещения фигур -->
+            <Grid Grid.Row="1" Grid.Column="1">
+                <!-- Четыре поля – для разных длительностей -->
+                <AbsoluteLayout x:Name="HourField"
+                      BackgroundColor="LightCoral" HeightRequest="500" WidthRequest="200"/>
+                <AbsoluteLayout x:Name="DayField"
+                      BackgroundColor="LightGray" HeightRequest="500" WidthRequest="200" IsVisible="False"/>
+                <AbsoluteLayout x:Name="WeekField"
+                      BackgroundColor="LightBlue" HeightRequest="500" WidthRequest="200" IsVisible="False"/>
+                <AbsoluteLayout x:Name="MonthField"
+                      BackgroundColor="LightGreen" HeightRequest="500" WidthRequest="200" IsVisible="False"/>
+            </Grid>
 
-        <!-- Панель управления сверху -->
-        <StackLayout Grid.Row="0" Grid.ColumnSpan="2" Padding="10" Spacing="10" Orientation="Horizontal">
-            <Button Text="Добавить задачу" Clicked="OnAddTaskClicked"/>
-            <Label x:Name="TimeScaleLabel" Text="Масштаб: Часы"/>
-            <Slider x:Name="TimeScaleSlider" Minimum="0" Maximum="3" ValueChanged="OnTimeScaleChanged" WidthRequest="200"/>
-        </StackLayout>
-    </Grid>
+            <!-- Панель переключения полей -->
+            <StackLayout Orientation="Horizontal" HorizontalOptions="Center" Padding="10" Spacing="15" Grid.Row="0" Grid.ColumnSpan="2">
+                <Button Text="Час" Clicked="OnHourButtonClicked" FontFamily="Mac" BackgroundColor="Indigo" TextColor="White"/>
+                <Button Text="День" Clicked="OnDayButtonClicked" FontFamily="Mac" BackgroundColor="Indigo" TextColor="White"/>
+                <Button Text="Неделя" Clicked="OnWeekButtonClicked" FontFamily="Mac" BackgroundColor="Indigo" TextColor="White"/>
+                <Button Text="Месяц" Clicked="OnMonthButtonClicked" FontFamily="Mac" BackgroundColor="Indigo" TextColor="White"/>
+            </StackLayout>
+
+            <!-- Панель управления задачами -->
+            <StackLayout Orientation="Vertical" Grid.Row="2" Grid.ColumnSpan="2" Padding="10" Spacing="10">
+                <HorizontalStackLayout Spacing="20">
+                      <Button Text="Добавить задачу" BackgroundColor="BlueViolet" TextColor="White" FontSize="10" Clicked="OnAddTaskClicked" FontFamily="Mac" HeightRequest="20" WidthRequest="130"/>
+                <!-- Кнопка поворота последней добавленной задачи -->
+                <Button Text="Повернуть задачу"  BackgroundColor="BlueViolet" TextColor="White" FontSize="10" Clicked="OnRotateLastTaskClicked" FontFamily="Mac" HeightRequest="20" WidthRequest="130"/>
+                </HorizontalStackLayout>
+              
+                <Label  x:Name="TimeScaleLabel" Text="Масштаб: Часы" FontFamily="Mac"/>
+                
+                <Slider x:Name="TimeScaleSlider" Minimum="0" Maximum="3" ValueChanged="OnTimeScaleChanged" WidthRequest="200"/>
+            </StackLayout>
+        </Grid>
+    </ScrollView>
+    
 </ContentPage>

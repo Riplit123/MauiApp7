@@ -1,33 +1,163 @@
-using Microsoft.Maui.Controls;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Layouts;
 using Microsoft.Maui.Controls.Shapes;
-using System.IO;
 // Алиасы для устранения неоднозначностей имён:
 using MAUIPath = Microsoft.Maui.Controls.Shapes.Path;
+
+// Добавьте пространство имен для LongPressBehavior из CommunityToolkit.Maui
+using CommunityToolkit.Maui.Behaviors;
 namespace MauiApp7
 {
     public partial class TaskBoardPage : ContentPage
     {
+        // Коллекция задач и соответствующих фигур
         private List<TaskModel> tasks = new();
         private Dictionary<TaskModel, View> taskShapes = new();
         private double timeScale = 0;
 
-        // Добавьте поле класса
-        private Point _panStartPosition;
+        // Текущее "активное" поле для добавления задачи (по умолчанию поле "Час")
+        private AbsoluteLayout currentField;
 
         public TaskBoardPage()
         {
             InitializeComponent();
+            currentField = HourField;
+            // Обновим временную шкалу при инициализации
+            UpdateTimeline("hour");
         }
+
+        // Обновление временной шкалы при появлении страницы
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            // Обновляем шкалу в зависимости от активного поля
+            // Здесь currentField == HourField по умолчанию, можно добавить логику, если нужно
+            UpdateTimeline("hour");
+        }
+
+        #region Переключение полей и обновление шкалы
+
+        private void OnHourButtonClicked(object sender, EventArgs e)
+        {
+            HourField.IsVisible = true;
+            DayField.IsVisible = false;
+            WeekField.IsVisible = false;
+            MonthField.IsVisible = false;
+            currentField = HourField;
+            UpdateTimeline("hour");
+        }
+
+        private void OnDayButtonClicked(object sender, EventArgs e)
+        {
+            HourField.IsVisible = false;
+            DayField.IsVisible = true;
+            WeekField.IsVisible = false;
+            MonthField.IsVisible = false;
+            currentField = DayField;
+            UpdateTimeline("day");
+        }
+
+        private void OnWeekButtonClicked(object sender, EventArgs e)
+        {
+            HourField.IsVisible = false;
+            DayField.IsVisible = false;
+            WeekField.IsVisible = true;
+            MonthField.IsVisible = false;
+            currentField = WeekField;
+            UpdateTimeline("week");
+        }
+
+        private void OnMonthButtonClicked(object sender, EventArgs e)
+        {
+            HourField.IsVisible = false;
+            DayField.IsVisible = false;
+            WeekField.IsVisible = false;
+            MonthField.IsVisible = true;
+            currentField = MonthField;
+            UpdateTimeline("month");
+        }
+
+        // Метод обновления временной шкалы (TimelinePanel)
+        private void UpdateTimeline(string timelineType)
+        {
+            TimelinePanel.Children.Clear();
+
+            // Добавим заголовок
+            var header = new Label
+            {
+                Text = "Временная шкала:",
+                FontAttributes = FontAttributes.Bold,
+                HorizontalOptions = LayoutOptions.Center,
+                TextColor = Colors.Black
+            };
+            TimelinePanel.Children.Add(header);
+
+            if (timelineType == "hour")
+            {
+                // 6 делений по 10 минут, от 10 до 60 минут
+                string[] divisions = new string[] { "10 мин", "20 мин", "30 мин", "40 мин", "50 мин", "60 мин" };
+                // Отображаем их снизу вверх (можно добавить переворот порядка, если требуется)
+                foreach (var div in divisions)
+                {
+                    TimelinePanel.Children.Add(new Label
+                    {
+                        Text = div,
+                        FontSize = 12,
+                        HorizontalOptions = LayoutOptions.Center,
+                        TextColor = Colors.Black
+                    });
+                }
+            }
+            else if (timelineType == "day")
+            {
+                // 24 деления – по часу, уменьшаем шрифт, чтобы вместилось
+                for (int i = 0; i < 24; i++)
+                {
+                    TimelinePanel.Children.Add(new Label
+                    {
+                        Text = $"{i}:00",
+                        FontSize = 10,
+                        HorizontalOptions = LayoutOptions.Center,
+                        TextColor = Colors.Black
+                    });
+                }
+            }
+            else if (timelineType == "week")
+            {
+                // 7 делений – дни недели (обратный порядок, если требуется)
+                string[] days = new string[] { "Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс" };
+                // Чтобы нижнее деление было последним днем, перевернем массив
+                Array.Reverse(days);
+                foreach (string day in days)
+                {
+                    TimelinePanel.Children.Add(new Label
+                    {
+                        Text = day,
+                        FontSize = 14,
+                        HorizontalOptions = LayoutOptions.Center,
+                        TextColor = Colors.Black
+                    });
+                }
+            }
+            else if (timelineType == "month")
+            {
+                // 4 деления – Неделя 1, Неделя 2, ...
+                for (int i = 1; i <= 4; i++)
+                {
+                    TimelinePanel.Children.Add(new Label
+                    {
+                        Text = $"Неделя {i}",
+                        FontSize = 14,
+                        HorizontalOptions = LayoutOptions.Center,
+                        TextColor = Colors.Black
+                    });
+                }
+            }
+        }
+
+        #endregion
 
         private async void OnAddTaskClicked(object sender, EventArgs e)
         {
-            // Создаем страницу добавления задачи и подписываемся на событие TaskCreated
             var addTaskPage = new AddTaskPage();
             addTaskPage.TaskCreated += OnTaskCreated;
             await Navigation.PushAsync(addTaskPage);
@@ -42,54 +172,85 @@ namespace MauiApp7
         private void AddTaskShape(TaskModel task)
         {
             var shapeView = CreateTetrisShape(task);
-            // Устанавливаем начальное положение фигуры через объект TaskField
-            TaskField.SetLayoutBounds(shapeView, new Rect(100, 100, shapeView.WidthRequest, shapeView.HeightRequest));
-            TaskField.SetLayoutFlags(shapeView, AbsoluteLayoutFlags.None);
+            AbsoluteLayout targetField = DetermineTargetField(task);
+            targetField.SetLayoutBounds(shapeView, new Rect(100, 100, shapeView.WidthRequest, shapeView.HeightRequest));
+            targetField.SetLayoutFlags(shapeView, AbsoluteLayoutFlags.None);
 
-            // Гестура для перемещения
-            var panGesture = new PanGestureRecognizer();
-            panGesture.PanUpdated += (s, e) => OnPanUpdated(s, e, shapeView);
-            shapeView.GestureRecognizers.Add(panGesture);
+            AttachPanGesture(shapeView);
 
-            // Гестура двойного нажатия для показа информации о задаче
-            var doubleTapGesture = new TapGestureRecognizer { NumberOfTapsRequired = 2 };
-            doubleTapGesture.Tapped += (s, e) => ShowTaskInfo(task);
-            shapeView.GestureRecognizers.Add(doubleTapGesture);
-
-            TaskField.Children.Add(shapeView);
+            targetField.Children.Add(shapeView);
             taskShapes[task] = shapeView;
         }
 
-        // Обновите метод OnPanUpdated
-        private void OnPanUpdated(object sender, PanUpdatedEventArgs e, View shape)
+        private AbsoluteLayout DetermineTargetField(TaskModel task)
         {
-            switch (e.StatusType)
-            {
-                case GestureStatus.Started:
-                    var bounds = TaskField.GetLayoutBounds(shape);
-                    _panStartPosition = new Point(bounds.X, bounds.Y);
-                    break;
-
-                case GestureStatus.Running:
-                    var newX = _panStartPosition.X + e.TotalX;
-                    var newY = _panStartPosition.Y + e.TotalY;
-
-                    if (!IsCollision(shape, newX, newY))
-                    {
-                        TaskField.SetLayoutBounds(shape, new Rect(newX, newY, shape.WidthRequest, shape.HeightRequest));
-                    }
-                    break;
-            }
+            string lowerDuration = task.Duration.ToLower();
+            if (lowerDuration.Contains("час"))
+                return HourField;
+            else if (lowerDuration.Contains("день"))
+                return DayField;
+            else if (lowerDuration.Contains("неделя"))
+                return WeekField;
+            else if (lowerDuration.Contains("месяц"))
+                return MonthField;
+            else
+                return currentField;
         }
 
-        private bool IsCollision(View current, double x, double y)
+        private void AttachPanGesture(View shape)
+        {
+            double initialX = 0, initialY = 0;
+            double initialWidth = 0, initialHeight = 0;
+            var panGesture = new PanGestureRecognizer();
+            panGesture.PanUpdated += (s, e) =>
+            {
+                var parent = (AbsoluteLayout)shape.Parent;
+                switch (e.StatusType)
+                {
+                    case GestureStatus.Started:
+                        {
+                            var bounds = parent.GetLayoutBounds(shape);
+                            initialX = bounds.X;
+                            initialY = bounds.Y;
+                            initialWidth = bounds.Width;
+                            initialHeight = bounds.Height;
+                            break;
+                        }
+                    case GestureStatus.Running:
+                        {
+                            var newX = initialX + e.TotalX;
+                            var newY = initialY + e.TotalY;
+
+                            double containerWidth = parent.Width;
+                            double containerHeight = parent.Height;
+                            if (newX < 0)
+                                newX = 0;
+                            if (newY < 0)
+                                newY = 0;
+                            if (newX + initialWidth > containerWidth)
+                                newX = containerWidth - initialWidth;
+                            if (newY + initialHeight > containerHeight)
+                                newY = containerHeight - initialHeight;
+
+                            if (!IsCollision(shape, newX, newY, parent))
+                            {
+                                parent.SetLayoutBounds(shape, new Rect(newX, newY, initialWidth, initialHeight));
+                            }
+                            break;
+                        }
+                }
+            };
+            shape.GestureRecognizers.Add(panGesture);
+        }
+
+        private bool IsCollision(View current, double x, double y, AbsoluteLayout container)
         {
             var movingRect = new Rect(x, y, current.Width, current.Height);
-            foreach (var view in TaskField.Children)
+            foreach (var view in container.Children)
             {
                 if (view == current)
                     continue;
-                var bounds = TaskField.GetLayoutBounds(view);
+                var bounds = container.GetLayoutBounds(view);
                 var rect = new Rect(bounds.X, bounds.Y, view.Width, view.Height);
                 if (movingRect.IntersectsWith(rect))
                     return true;
@@ -103,7 +264,6 @@ namespace MauiApp7
             switch (task.Category)
             {
                 case "Работа":
-                    // Фигура-палка (прямоугольник)
                     shape = new Rectangle
                     {
                         Fill = task.IsImportant ? Brush.Red : Brush.Blue,
@@ -112,9 +272,9 @@ namespace MauiApp7
                     };
                     break;
                 case "Учёба":
-                    // Фигура в виде "Т", создается с помощью Path
                     var converter = new PathGeometryConverter();
-                    var geometry = (PathGeometry)converter.ConvertFromInvariantString("M0,0 L60,0 L60,20 L40,20 L40,40 L20,40 L20,20 L0,20 Z");
+                    var geometry = (PathGeometry)converter.ConvertFromInvariantString(
+                        "M0,0 L60,0 L60,20 L40,20 L40,40 L20,40 L20,20 L0,20 Z");
                     shape = new MAUIPath
                     {
                         Data = geometry,
@@ -125,7 +285,6 @@ namespace MauiApp7
                     break;
                 case "Личное":
                 default:
-                    // Квадрат
                     shape = new Rectangle
                     {
                         Fill = task.IsImportant ? Brush.Red : Brush.Purple,
@@ -142,26 +301,24 @@ namespace MauiApp7
             };
         }
 
-        private async void ShowTaskInfo(TaskModel task)
+        private void RotateShape(View shape)
         {
-            if (task.IsImportant)
+            shape.Rotation = (shape.Rotation + 90) % 360;
+        }
+
+        private void OnRotateLastTaskClicked(object sender, EventArgs e)
+        {
+            if (tasks.Count > 0)
             {
-                // Если задача важная, предлагаем выбор: "Режим Pomodoro" или просто ОК
-                string action = await DisplayActionSheet(
-                    $"Название: {task.Name}\nКатегория: {task.Category}\nДлительность: {task.Duration}",
-                    "Отмена",
-                    null,
-                    "Режим Pomodoro", "ОК");
-                if (action == "Режим Pomodoro")
+                TaskModel lastTask = tasks[tasks.Count - 1];
+                if (taskShapes.TryGetValue(lastTask, out View shapeView))
                 {
-                   // await Navigation.PushAsync(new MainPage());
+                    RotateShape(shapeView);
                 }
             }
             else
             {
-                await DisplayAlert("Информация о задаче",
-                    $"Название: {task.Name}\nКатегория: {task.Category}\nДлительность: {task.Duration}",
-                    "ОК");
+                DisplayAlert("Сообщение", "Задач пока нет", "ОК");
             }
         }
 

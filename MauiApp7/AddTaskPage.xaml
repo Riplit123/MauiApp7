@@ -2,10 +2,10 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MauiApp7.AddTaskPage"
-             Title="AddTaskPage">
+             Title="Редактор задачи" BackgroundColor="Black">
     <VerticalStackLayout Padding="20" Spacing="15">
-        <Entry x:Name="NameEntry" Placeholder="Название задачи"/>
-        <Picker x:Name="CategoryPicker" Title="Категория">
+        <Entry x:Name="NameEntry" Placeholder="Название задачи" FontFamily="Mac"/>
+        <Picker x:Name="CategoryPicker" Title="Категория" FontFamily="Mac">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
                     <x:String>Личное</x:String>
@@ -14,7 +14,7 @@
                 </x:Array>
             </Picker.ItemsSource>
         </Picker>
-        <Picker x:Name="DurationPicker" Title="Длительность">
+        <Picker x:Name="DurationPicker" Title="Длительность"  FontFamily="Mac">
             <Picker.ItemsSource>
                 <x:Array Type="{x:Type x:String}">
                     <x:String>1 час</x:String>
@@ -26,10 +26,10 @@
             </Picker.ItemsSource>
         </Picker>
         <HorizontalStackLayout>
-            <Label Text="Важная задача"/>
-            <Switch x:Name="ImportantSwitch"/>
+            <Label Text="Важная задача" FontFamily="Mac"/>
+            <Switch x:Name="ImportantSwitch" Margin="20,0,0,0"/>
         </HorizontalStackLayout>
-        <Button Text="Сохранить" Clicked="OnSaveClicked"/>
-        <Button Text="Отменить" Clicked="OnCancelClicked"/>
+        <Button Text="Сохранить" Clicked="OnSaveClicked" FontFamily="Mac" BackgroundColor="Indigo" TextColor="White"/>
+        <Button Text="Отменить" Clicked="OnCancelClicked" FontFamily="Mac" BackgroundColor="Indigo" TextColor="White"/>
     </VerticalStackLayout>
 </ContentPage>
