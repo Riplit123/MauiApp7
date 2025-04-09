@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiApp7.TaskBoardPage"
+             Title="TaskBoardPage">
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="Auto,*">
+        <!-- Временная шкала слева -->
+        <StackLayout x:Name="TimeScale" Grid.Row="1" Grid.Column="0" Padding="10" Spacing="20">
+            <Label Text="Час"/>
+            <Label Text="День"/>
+            <Label Text="Неделя"/>
+            <Label Text="Месяц"/>
+        </StackLayout>
+
+        <!-- Поле для размещения фигур задач -->
+        <AbsoluteLayout x:Name="TaskField" Grid.Row="1" Grid.Column="1"
+                    BackgroundColor="LightGray" HeightRequest="500" />
+
+        <!-- Панель управления сверху -->
+        <StackLayout Grid.Row="0" Grid.ColumnSpan="2" Padding="10" Spacing="10" Orientation="Horizontal">
+            <Button Text="Добавить задачу" Clicked="OnAddTaskClicked"/>
+            <Label x:Name="TimeScaleLabel" Text="Масштаб: Часы"/>
+            <Slider x:Name="TimeScaleSlider" Minimum="0" Maximum="3" ValueChanged="OnTimeScaleChanged" WidthRequest="200"/>
+        </StackLayout>
+    </Grid>
+</ContentPage>

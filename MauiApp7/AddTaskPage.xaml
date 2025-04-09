@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MauiApp7.AddTaskPage"
+             Title="AddTaskPage">
+    <VerticalStackLayout Padding="20" Spacing="15">
+        <Entry x:Name="NameEntry" Placeholder="Название задачи"/>
+        <Picker x:Name="CategoryPicker" Title="Категория">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>Личное</x:String>
+                    <x:String>Работа</x:String>
+                    <x:String>Учёба</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+        <Picker x:Name="DurationPicker" Title="Длительность">
+            <Picker.ItemsSource>
+                <x:Array Type="{x:Type x:String}">
+                    <x:String>1 час</x:String>
+                    <x:String>5 часов</x:String>
+                    <x:String>1 день</x:String>
+                    <x:String>Неделя</x:String>
+                    <x:String>Месяц</x:String>
+                </x:Array>
+            </Picker.ItemsSource>
+        </Picker>
+        <HorizontalStackLayout>
+            <Label Text="Важная задача"/>
+            <Switch x:Name="ImportantSwitch"/>
+        </HorizontalStackLayout>
+        <Button Text="Сохранить" Clicked="OnSaveClicked"/>
+        <Button Text="Отменить" Clicked="OnCancelClicked"/>
+    </VerticalStackLayout>
+</ContentPage>
